@@ -646,13 +646,29 @@
             document.getElementById('exam-result').innerText = score.toFixed(2) + " Marks";
         }
 
-        const examDates = {
-            neet: new Date('2027-05-02T14:00:00'),
-            jee: new Date('2027-01-24T09:00:00'),
-            iiser: new Date('2027-06-07T09:00:00'),
-            cuet: new Date('2027-05-15T09:00:00'),
-            nda: new Date('2027-04-18T10:00:00')
-        };
+        // --- AUTOMATIC DYNAMIC EXAM DATES LOGIC ---
+        function getDynamicExamDate(month, day, hour = 14) {
+            const now = new Date();
+            let year = now.getFullYear();
+            // Month is 0-indexed (0 = January, 4 = May, etc.)
+            let examDate = new Date(year, month, day, hour, 0, 0);
+
+            // Agar is saal ki exam date nikal chuki hai, toh automatic agle saal ki date set kar do
+            if (now > examDate) {
+                examDate = new Date(year + 1, month, day, hour, 0, 0);
+            }
+            return examDate;
+        }
+
+        function getDynamicExamDatesMap() {
+            return {
+                neet: getDynamicExamDate(4, 2, 14),   // May 2 (Month 4 = May)
+                jee: getDynamicExamDate(0, 24, 9),    // Jan 24 (Month 0 = January)
+                iiser: getDynamicExamDate(5, 7, 9),   // June 7 (Month 5 = June)
+                cuet: getDynamicExamDate(4, 15, 9),   // May 15 (Month 4 = May)
+                nda: getDynamicExamDate(3, 18, 10)    // April 18 (Month 3 = April)
+            };
+        }
 
         function changeGlobalCountdown() {
             const selectEl = document.getElementById('countdown-selector');
@@ -694,6 +710,7 @@
                 targetDate = new Date(customVal);
             } else {
                 customBox.classList.remove('active');
+                const examDates = getDynamicExamDatesMap();
                 targetDate = examDates[selectedKey];
             }
 
